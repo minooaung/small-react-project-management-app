@@ -8,18 +8,46 @@ function App() {
   const [projectsState, setProjectsState] = useState({
     selectedProjectId: undefined,
     projects: [],
+    tasks: [],
   });
 
-  const handleCreateProject = () => {
+  function handleAddTask(task) {
+    setProjectsState((prevState) => {
+      const taskId = Math.random();
+      const newTask = {
+        text: task,
+        projectId: prevState.selectedProjectId,
+        id: taskId,
+      };
+
+      return {
+        ...prevState,
+        tasks: [newTask, ...prevState.tasks],
+      };
+    });
+
+    //console.log(projectsState.tasks);
+  }
+
+  function handleDeleteTask(taskIdToDelete) {
+    setProjectsState((prevState) => {
+      return {
+        ...prevState,
+        tasks: prevState.tasks.filter((task) => task.id !== taskIdToDelete),
+      };
+    });
+  }
+
+  function handleCreateProject() {
     setProjectsState((prevState) => {
       return {
         ...prevState,
         selectedProjectId: null,
       };
     });
-  };
+  }
 
-  function handleSubmitProject(projectData) {
+  function handleAddProject(projectData) {
     setProjectsState((prevState) => {
       const newProject = {
         ...projectData,
@@ -54,9 +82,27 @@ function App() {
     });
   }
 
-  function handleProjectDelete(projectId) {
-    alert("deleting: " + projectId);
+  function handleProjectDelete() {
+    setProjectsState((prevState) => {
+      return {
+        ...prevState,
+        selectedProjectId: undefined,
+        projects: prevState.projects.filter(
+          (project) => project.id !== prevState.selectedProjectId
+        ),
+      };
+    });
   }
+
+  // function handleProjectDelete(projectIdToDelete) {
+  //   setProjectsState((prevState) => ({
+  //     ...prevState,
+  //     selectedProjectId: undefined,
+  //     projects: prevState.projects.filter(
+  //       (project) => project.id !== projectIdToDelete
+  //     ),
+  //   }));
+  // }
 
   //console.log("Projects state ", projectsState);
 
@@ -69,7 +115,7 @@ function App() {
   if (projectsState.selectedProjectId === null) {
     content = (
       <NewProject
-        onSubmit={handleSubmitProject}
+        onSubmit={handleAddProject}
         onCancel={handleCancelSaveProject}
       />
     );
@@ -83,6 +129,9 @@ function App() {
       <SelectedProject
         project={selectedProject}
         onDeleteProject={handleProjectDelete}
+        onAddTask={handleAddTask}
+        onDeleteTask={handleDeleteTask}
+        tasks={projectsState.tasks}
       />
     );
   }
@@ -93,6 +142,7 @@ function App() {
         onCreateProject={handleCreateProject}
         onSelectProject={handleProjectSelect}
         projects={projectsState.projects}
+        selectedProjectId={projectsState.selectedProjectId}
       />
       {content}
     </main>
